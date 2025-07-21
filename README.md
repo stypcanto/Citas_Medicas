@@ -104,7 +104,7 @@ Este sistema es una **aplicación web especializada** para la gestión y coordin
      A[Click en fecha] --> B[Modal de configuración]
      B --> C[Definir horario]
      C --> D[Establecer duración]
-     D --> E[Confirmar]
+     D --> E[Guardar turno]
      ````
 
     ![Descripción de la imagen](src/docs/img4.png)
