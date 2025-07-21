@@ -1,15 +1,122 @@
 # 🗓️ Sistema de Citas Médicas
 
-Este proyecto es una aplicación web construida con **React**, **Vite** y **Tailwind CSS**, empaquetada con **Docker** y servida en producción usando **NGINX**.
+# 🏥 Sistema de Coordinación Médica - Gestión de Turnos Hospitalarios
 
-## 🚀 Tecnologías Utilizadas
+## 📌 Descripción del Proyecto
 
-- [React 19](https://react.dev/)
-- [Vite 7](https://vitejs.dev/)
-- [Tailwind CSS 3](https://tailwindcss.com/)
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
-- [PostCSS + Autoprefixer](https://github.com/postcss/postcss)
+Este sistema es una **aplicación web especializada** para la gestión y coordinación de turnos médicos en entornos hospitalarios. Permite a los coordinadores médicos:
+
+- Programar turnos para diferentes especialistas
+- Visualizar la disponibilidad en calendario interactivo
+- Controlar la carga horaria de cada profesional
+- Generar reportes estadísticos mensuales
+
+## 🎯 Objetivos Principales
+
+✔ **Optimizar la asignación** de turnos médicos  
+✔ **Prevenir sobrecarga laboral** con límites de horas  
+✔ **Digitalizar procesos** manuales de coordinación  
+✔ **Reducir errores** en asignación de horarios  
+✔ **Generar datos precisos** para análisis estadístico  
+
+## 🧑‍💻 Funcionalidades Clave
+
+### 📅 Gestión de Calendario
+- Vista mensual interactiva (Agosto-Diciembre 2025)
+- Resaltado visual de días con turnos asignados
+- Selección por especialidad médica
+- Filtrado por médico individual
+
+### ⏱ Control de Turnos
+- Creación de bloques horarios configurables:
+  - Duración personalizable (15, 30, 45, 60 mins)
+  - Horario laboral (6:00 AM - 10:00 PM)
+- Asignación de múltiples turnos por día
+- Visualización de cupos disponibles por turno
+
+### 👨‍⚕️ Gestión de Profesionales
+- Base de datos de médicos por especialidad
+- Información detallada por profesional:
+  - Nombre completo
+  - Especialidad
+  - Documentación profesional
+- Historial de turnos asignados
+
+### 📊 Sistema de Alertas y Límites
+- **Control de horas máximas** (150 horas/mes):
+  - Barra de progreso visual
+  - Notificación al alcanzar 80% de capacidad
+  - Bloqueo visual al superar límite
+- **Confirmación especial** para turnos en:
+  - Domingos
+  - Horarios no convencionales
+
+### 📈 Estadísticas en Tiempo Real
+- Turnos programados por médico
+- Total de cupos disponibles
+- Horas acumuladas mensuales
+- Comparativo entre especialidades
+
+## 🛠 Tecnologías Implementadas
+```bash
+| Área           | Tecnologías                                                                 |
+|----------------|----------------------------------------------------------------------------|
+| Frontend       | React 19, TypeScript, Vite 7, Tailwind CSS 3, Lucide Icons                |
+| Estilos        | Tailwind CSS, PostCSS, Autoprefixer                                        |
+| Contenedores   | Docker, Docker Compose                                                     |
+| Servidor       | NGINX (para producción)                                                    |
+| Control        | Git, GitHub/GitLab/Bitbucket                                               |
+````
+
+## 🌟 Beneficios del Sistema
+
+✅ **Reducción de conflictos**  
+   - Asignación automática sin traslapes de horarios  
+   - Alertas en tiempo real por duplicidad de turnos  
+
+✅ **Prevención de sobrecarga laboral**  
+   - Límite inteligente de 150 horas/médico/mes  
+   - Advertencias al alcanzar el 80% de capacidad  
+
+✅ **Acceso centralizado**  
+   - Base de datos unificada de profesionales  
+   - Historial completo de turnos asignados  
+
+✅ **Reportes automáticos**  
+   - Generación de estadísticas mensuales  
+   - Exportable para análisis administrativos  
+
+✅ **Interfaz intuitiva**  
+   - Diseño limpio y profesional  
+   - Flujo de trabajo optimizado en 3 pasos  
+
+## 📚 Guía Rápida de Uso
+
+1. **Selección de médico**  
+   - Panel izquierdo → Listado por especialidad  
+   - Filtrado por nombre o área médica  
+
+2. **Programación de turnos**  
+   ```mermaid
+   graph TD
+     A[Click en fecha] --> B[Modal de configuración]
+     B --> C[Definir horario]
+     C --> D[Establecer duración]
+     D --> E[Confirmar]
+     ````
+
+3. **Configuración básica**
+
+    ⏰ Horario: 6:00 AM - 10:00 PM
+    ⏳ Duración por cita: 15, 30, 45 o 60 mins
+    📌 Cupos generados automáticamente
+
+4. **Monitoreo**
+
+    Panel derecho con:
+    Turnos programados
+    Cupos disponibles
+    Progreso de horas (0/150)
 
 ---
 
@@ -172,3 +279,47 @@ docker compose down
 3. Una vez iniciado, abre tu navegador  en:
 
 http://localhost:5173
+
+## 📜 Derechos de Autor y Licencia
+
+**Copyright © 2024 [Ing. Styp Canto](mailto:styp611@outlook.com)**  
+Todos los derechos reservados.
+
+### 📄 Licencia
+Este proyecto es software propietario bajo licencia privada. Se prohíbe expresamente:
+
+- La redistribución no autorizada
+- La modificación del código sin consentimiento
+- El uso comercial sin acuerdo previo
+
+### 🔒 Política de Uso
+Para solicitar permisos o licencias:
+- Contacto: [styp611@outlook.com](mailto:styp611@outlook.com)
+- Asunto: "Solicitud de uso Sistema de Coordinación Médica"
+
+
+## 📜 Derechos de Autor y Licencia
+
+**Copyright © 2024 [Ing. Styp Canto](mailto:styp611@outlook.com)**  
+Todos los derechos reservados.
+
+### 📄 Licencia
+Este proyecto es software propietario bajo licencia privada. Se prohíbe expresamente:
+
+- La redistribución no autorizada
+- La modificación del código sin consentimiento
+- El uso comercial sin acuerdo previo
+
+### 🔒 Política de Uso
+Para solicitar permisos o licencias:
+- Contacto: [styp611@outlook.com](mailto:styp611@outlook.com)
+- Asunto: "Solicitud de uso Sistema de Coordinación Médica"
+
+```xml
+<!-- Ejemplo de metadata para reconocimiento de autoría -->
+<metadata>
+  <author>Ing. Salvador Trinidad Yerena Pantoja (Styp Canto)</author>
+  <contact>styp611@outlook.com</contact>
+  <creation-date>2024</creation-date>
+  <version>1.0.0</version>
+</metadata>
