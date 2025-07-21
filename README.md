@@ -16,12 +16,12 @@ Este proyecto es una aplicación web construida con **React**, **Vite** y **Tail
 ## 📁 Estructura del Proyecto
 
 ```bash
-    mi-proyecto-citas/
+mi-proyecto-citas/
 ├── public/
 ├── src/
-│ ├── App.jsx
-│ ├── main.jsx
-│ └── index.css
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
 ├── Dockerfile
 ├── docker-compose.yml
 ├── tailwind.config.js
@@ -94,7 +94,6 @@ export default {
 
 Se configuró para construir la aplicación con `vite build` y servirla usando **NGINX**:
 
-```Dockerfile
 # Etapa 1: Build con Node
 FROM node:20-alpine AS build
 WORKDIR /app
@@ -107,40 +106,34 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
 
-```yaml
-version: '3'
-services:
-  web:
-    build: .
-    ports:
-      - "5173:80"
-    container_name: citas-web
 
 ```
 
 ### 🧩 docker-compose.yml
 
-Este archivo se utiliza para levantar el contenedor con la imagen construida:
-
-```bash
-version: "3.9"
-
 services:
   react-app:
     build: .
     ports:
-      - "5173:80" # Puedes cambiar 5173 si ya está en uso
+      - "5173:80"
     container_name: citas_react_app
+
 
 ```
 
 ### ▶️ Ejecutar en Producción
 
-Para construir y levantar el contenedor:
+1. Para construir y levantar el contenedor:
 
 ```bash
 docker-compose up --build
-````
+```
+
+2. Para detener y eliminar los contenedores:
+
+```bash
+docker compose down
+```
 
 Una vez iniciado, abre tu navegador en:
 

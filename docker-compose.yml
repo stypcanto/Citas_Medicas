@@ -4,5 +4,5 @@ services:
   react-app:
     build: .
     ports:
-      - "5173:80" # Puedes cambiar 5173 si ya está en uso
+      - "5173:80"
     container_name: citas_react_app
