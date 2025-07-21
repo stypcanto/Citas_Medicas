@@ -96,6 +96,8 @@ Este sistema es una **aplicación web especializada** para la gestión y coordin
    - Panel izquierdo → Listado por especialidad  
    - Filtrado por nombre o área médica  
 
+    ![Descripción de la imagen](src/docs/img2.png)
+
 2. **Programación de turnos**  
    ```mermaid
    graph TD
@@ -105,11 +107,15 @@ Este sistema es una **aplicación web especializada** para la gestión y coordin
      D --> E[Confirmar]
      ````
 
+    ![Descripción de la imagen](src/docs/img4.png)
+
 3. **Configuración básica**
 
     ⏰ Horario: 6:00 AM - 10:00 PM
     ⏳ Duración por cita: 15, 30, 45 o 60 mins
     📌 Cupos generados automáticamente
+
+    ![Descripción de la imagen](src/docs/img1.png)
 
 4. **Monitoreo**
 
@@ -118,6 +124,7 @@ Este sistema es una **aplicación web especializada** para la gestión y coordin
     Cupos disponibles
     Progreso de horas (0/150)
 
+    ![Descripción de la imagen](src/docs/img3.png)
 ---
 
 ## 📁 Estructura del Proyecto
@@ -129,6 +136,7 @@ mi-proyecto-citas/
 │   ├── App.jsx
 │   ├── main.jsx
 │   └── index.css
+│   └── SistemaCitasMedicas.css
 ├── Dockerfile
 ├── docker-compose.yml
 ├── tailwind.config.js
@@ -280,22 +288,6 @@ docker compose down
 
 http://localhost:5173
 
-## 📜 Derechos de Autor y Licencia
-
-**Copyright © 2024 [Ing. Styp Canto](mailto:styp611@outlook.com)**  
-Todos los derechos reservados.
-
-### 📄 Licencia
-Este proyecto es software propietario bajo licencia privada. Se prohíbe expresamente:
-
-- La redistribución no autorizada
-- La modificación del código sin consentimiento
-- El uso comercial sin acuerdo previo
-
-### 🔒 Política de Uso
-Para solicitar permisos o licencias:
-- Contacto: [styp611@outlook.com](mailto:styp611@outlook.com)
-- Asunto: "Solicitud de uso Sistema de Coordinación Médica"
 
 
 ## 📜 Derechos de Autor y Licencia
@@ -320,6 +312,6 @@ Para solicitar permisos o licencias:
 <metadata>
   <author>Ing. Salvador Trinidad Yerena Pantoja (Styp Canto)</author>
   <contact>styp611@outlook.com</contact>
-  <creation-date>2024</creation-date>
+  <creation-date>2025</creation-date>
   <version>1.0.0</version>
 </metadata>
