@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, User, Save, Plus, X, Check, UserCheck, Eye, Edit2 } from 'lucide-react';
+import { Calendar, Clock, User, Save, Plus, X, Check, UserCheck, Eye, Edit2, AlertTriangle } from 'lucide-react';
+
 
 const SistemaCoordinacionMedica = () => {
   // Estados principales
@@ -29,6 +30,14 @@ const SistemaCoordinacionMedica = () => {
     { id: 10, name: 'RODRIGUEZ VARGAS MIGUEL ANGEL', specialty: 'PEDIATRIA', dni: '11223344' }
   ];
 
+  // Función para calcular horas entre dos tiempos
+  const calculateHours = (startTime: string, endTime: string): number => {
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    return (endHour + endMinute / 60) - (startHour + startMinute / 60);
+  };
+
+
   // Generar opciones de tiempo cada 30 minutos
   const generateTimeSlots = (): string[] => {
     const slots: string[] = [];
@@ -39,21 +48,23 @@ const SistemaCoordinacionMedica = () => {
     return slots;
   };
 
+
+
   // Generar cupos de citas basado en el rango de tiempo
   const generateAppointmentSlots = (startTime: string, endTime: string, duration: number): string[] => {
     const slots: string[] = [];
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
-    
+
     const startTotalMinutes = startHour * 60 + startMinute;
     const endTotalMinutes = endHour * 60 + endMinute;
-    
+
     for (let minutes = startTotalMinutes; minutes < endTotalMinutes; minutes += duration) {
       const hour = Math.floor(minutes / 60);
       const minute = minutes % 60;
       slots.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
     }
-    
+
     return slots;
   };
 
@@ -82,7 +93,7 @@ const SistemaCoordinacionMedica = () => {
     }
 
     const appointmentSlots = generateAppointmentSlots(selectedStartTime, selectedEndTime, appointmentDuration);
-    
+
     const key = `${selectedDoctor}_${selectedDate}`;
     setScheduledShifts(prev => ({
       ...prev,
@@ -101,7 +112,7 @@ const SistemaCoordinacionMedica = () => {
     setSelectedDate(null);
     setSelectedStartTime('');
     setSelectedEndTime('');
-    
+
     alert(`Turno programado exitosamente con ${appointmentSlots.length} cupos de ${appointmentDuration} minutos`);
   };
 
@@ -114,23 +125,36 @@ const SistemaCoordinacionMedica = () => {
     }));
   };
 
+  // Calcular horas totales programadas en el mes
+  const calculateMonthlyHours = () => {
+    if (!selectedDoctor) return 0;
+
+    const shifts = Object.entries(scheduledShifts)
+      .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
+      .flatMap(([, shifts]) => shifts);
+
+    return shifts.reduce((total, shift) => {
+      return total + calculateHours(shift.startTime, shift.endTime);
+    }, 0);
+  };
+
   // Renderizar calendario del mes
   const renderCalendar = () => {
     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
     const firstDayOfWeek = new Date(selectedYear, selectedMonth - 1, 1).getDay();
-    
+
     // Ajustamos para que la semana comience con Lunes (1) en lugar de Domingo (0)
     const adjustedFirstDay = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
-    
+
     const calendar: React.ReactNode[] = [];
-    const monthNames = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
+    const monthNames = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
     // Espacios vacíos para el primer día del mes
     for (let i = 0; i < adjustedFirstDay; i++) {
       calendar.push(<div key={`empty-${i}`} className="p-2"></div>);
     }
-    
+
     // Días del mes
     for (let day = 1; day <= daysInMonth; day++) {
       const dateObj = new Date(selectedYear, selectedMonth - 1, day);
@@ -139,17 +163,17 @@ const SistemaCoordinacionMedica = () => {
       const hasShifts = selectedDoctor && hasScheduledShifts(parseInt(selectedDoctor), day);
       const shifts = selectedDoctor ? getShiftsForDate(parseInt(selectedDoctor), dateStr) : [];
       const totalSlots = shifts.reduce((total, shift) => total + shift.slots.length, 0);
-      
+
+
       calendar.push(
         <div
           key={day}
-          className={`p-2 text-center cursor-pointer border rounded-lg transition-all duration-200 min-h-[80px] flex flex-col justify-between ${
-            isSunday
-              ? 'bg-blue-50 border-blue-200' // Estilo para domingos
-              : hasShifts 
-                ? 'bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-300 shadow-sm' 
-                : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
-          }`}
+          className={`p-2 text-center cursor-pointer border rounded-lg transition-all duration-200 min-h-[80px] flex flex-col justify-between ${isSunday
+            ? 'bg-blue-50 border-blue-200' // Estilo para domingos
+            : hasShifts
+              ? 'bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-300 shadow-sm'
+              : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+            }`}
           onClick={() => {
             if (selectedDoctor) {
               if (isSunday) {
@@ -189,14 +213,17 @@ const SistemaCoordinacionMedica = () => {
         </div>
       );
     }
-    
+
+
+
+
     return (
       <div className="p-6 bg-white rounded-lg shadow-lg">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-gray-900">{monthNames[selectedMonth]} {selectedYear}</h3>
           <div className="flex items-center gap-3">
-            <select 
-              value={selectedMonth} 
+            <select
+              value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
@@ -208,7 +235,7 @@ const SistemaCoordinacionMedica = () => {
             </select>
           </div>
         </div>
-        
+
         {!selectedDoctor && (
           <div className="py-12 text-center text-gray-500 rounded-lg bg-gray-50">
             <User className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -216,7 +243,7 @@ const SistemaCoordinacionMedica = () => {
             <p className="mt-2 text-sm">Una vez seleccionado, podrá hacer clic en cualquier día para programar turnos</p>
           </div>
         )}
-        
+
         {selectedDoctor && (
           <>
             <div className="grid grid-cols-7 gap-2 mb-4">
@@ -249,7 +276,10 @@ const SistemaCoordinacionMedica = () => {
     );
   };
 
+  // 4. Cálculos antes del return principal (esto es nuevo)
   const timeSlots = generateTimeSlots();
+  const monthlyHours = calculateMonthlyHours();
+  const hoursExceeded = monthlyHours > 150;
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -275,7 +305,7 @@ const SistemaCoordinacionMedica = () => {
                 <UserCheck className="w-5 h-5" />
                 Selección de Médico
               </h2>
-              
+
               <div className="mb-6">
                 <label className="block mb-3 text-sm font-medium text-gray-700">
                   Médico
@@ -313,35 +343,92 @@ const SistemaCoordinacionMedica = () => {
             </div>
 
             {/* Estadísticas rápidas */}
-            {selectedDoctor && (
-              <div className="p-6 bg-white shadow-lg rounded-xl">
-                <h3 className="mb-4 text-lg font-semibold text-gray-900">Estadísticas del Mes</h3>
-                {(() => {
-                  const doctorShifts = Object.entries(scheduledShifts)
-                    .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
-                    .reduce((total, [, shifts]) => total + shifts.length, 0);
-                  
-                  const totalSlots = Object.entries(scheduledShifts)
-                    .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
-                    .reduce((total, [, shifts]) => {
-                      return total + shifts.reduce((shiftTotal, shift) => shiftTotal + shift.slots.length, 0);
-                    }, 0);
+           {selectedDoctor && (
+  <div className="p-6 bg-white shadow-lg rounded-xl">
+    <h3 className="mb-4 text-lg font-semibold text-gray-900">Estadísticas del Mes</h3>
+    <div className="space-y-3">
+      {/* Estadística de turnos programados */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
+        <span className="text-sm font-medium text-green-800">Turnos programados:</span>
+        <span className="text-lg font-bold text-green-600">
+          {Object.entries(scheduledShifts)
+            .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
+            .reduce((total, [, shifts]) => total + shifts.length, 0)}
+        </span>
+      </div>
 
-                  return (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-green-50">
-                        <span className="text-sm font-medium text-green-800">Turnos programados:</span>
-                        <span className="text-lg font-bold text-green-600">{doctorShifts}</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
-                        <span className="text-sm font-medium text-blue-800">Total de cupos:</span>
-                        <span className="text-lg font-bold text-blue-600">{totalSlots}</span>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
+      {/* Estadística de cupos */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
+        <span className="text-sm font-medium text-blue-800">Total de cupos:</span>
+        <span className="text-lg font-bold text-blue-600">
+          {Object.entries(scheduledShifts)
+            .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
+            .reduce((total, [, shifts]) => {
+              return total + shifts.reduce((shiftTotal, shift) => shiftTotal + shift.slots.length, 0);
+            }, 0)}
+        </span>
+      </div>
+
+      {/* Estadística de horas programadas - Versión mejorada */}
+      <div className={`flex items-center justify-between p-3 rounded-lg transition-colors duration-200 ${
+        hoursExceeded 
+          ? 'bg-red-50 border border-red-100' 
+          : 'bg-purple-50 border border-purple-100'
+      }`}>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-purple-800">Horas programadas:</span>
+          {hoursExceeded && (
+            <AlertTriangle className="w-4 h-4 text-red-500" />
+          )}
+        </div>
+        <span className={`text-lg font-bold ${
+          hoursExceeded 
+            ? 'text-red-600 animate-pulse' 
+            : 'text-purple-600'
+        }`}>
+          {monthlyHours.toFixed(1)} horas
+          {hoursExceeded && (
+            <span className="block text-xs font-normal text-right text-red-500">
+              (Límite: 150h)
+            </span>
+          )}
+        </span>
+      </div>
+
+      {/* Mensaje de advertencia mejorado */}
+      {hoursExceeded && (
+        <div className="flex items-start gap-2 p-3 text-sm text-red-700 border border-red-200 rounded-lg bg-red-50 animate-bounce">
+          <AlertTriangle className="flex-shrink-0 w-5 h-5 mt-0.5 text-red-600" />
+          <div>
+            <p className="font-medium">¡Límite excedido!</p>
+            <p>El profesional superó el máximo de 150 horas mensuales programadas.</p>
+            <p className="mt-1 text-xs text-red-600">
+              Por favor, revise la programación o solicite autorización especial.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Indicador de progreso (nueva característica) */}
+      <div className="mt-4">
+        <div className="flex justify-between mb-1 text-xs text-gray-500">
+          <span>Progreso mensual:</span>
+          <span>{Math.min(monthlyHours, 150).toFixed(1)}/150 horas</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            className={`h-2.5 rounded-full ${
+              hoursExceeded ? 'bg-red-600' : 'bg-purple-600'
+            }`} 
+            style={{
+              width: `${Math.min((monthlyHours / 150) * 100, 100)}%`
+            }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
           </div>
 
           {/* Calendario */}
@@ -496,7 +583,7 @@ const SistemaCoordinacionMedica = () => {
 
               {(() => {
                 const shifts = getShiftsForDate(parseInt(selectedDoctor), viewDate);
-                
+
                 if (shifts.length === 0) {
                   return (
                     <div className="py-8 text-center text-gray-500">
@@ -526,7 +613,7 @@ const SistemaCoordinacionMedica = () => {
                             <X className="w-4 h-4" />
                           </button>
                         </div>
-                        
+
                         <div className="grid grid-cols-4 gap-2">
                           {shift.slots.map((slot, index) => (
                             <div
