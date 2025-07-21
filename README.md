@@ -15,7 +15,7 @@ Este proyecto es una aplicación web construida con **React**, **Vite** y **Tail
 
 ## 📁 Estructura del Proyecto
 
-    ```bash
+```bash
     mi-proyecto-citas/
 ├── public/
 ├── src/
@@ -30,7 +30,7 @@ Este proyecto es una aplicación web construida con **React**, **Vite** y **Tail
 ├── vite.config.js
 └── README.md
 
-    ```
+```
 
 
 ---
@@ -117,6 +117,23 @@ services:
     container_name: citas-web
 
 ```
+
+### 🧩 docker-compose.yml
+
+Este archivo se utiliza para levantar el contenedor con la imagen construida:
+
+```bash
+version: "3.9"
+
+services:
+  react-app:
+    build: .
+    ports:
+      - "5173:80" # Puedes cambiar 5173 si ya está en uso
+    container_name: citas_react_app
+
+```
+
 ### ▶️ Ejecutar en Producción
 
 Para construir y levantar el contenedor:
