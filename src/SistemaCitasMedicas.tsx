@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Calendar, Clock, User, Save, Plus, X, Check, UserCheck, Eye, Edit2 } from 'lucide-react';
 
 const SistemaCoordinacionMedica = () => {
@@ -8,12 +8,12 @@ const SistemaCoordinacionMedica = () => {
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedStartTime, setSelectedStartTime] = useState('');
   const [selectedEndTime, setSelectedEndTime] = useState('');
   const [appointmentDuration, setAppointmentDuration] = useState(30);
-  const [scheduledShifts, setScheduledShifts] = useState({});
-  const [viewDate, setViewDate] = useState(null);
+  const [scheduledShifts, setScheduledShifts] = useState<Record<string, any[]>>({});
+  const [viewDate, setViewDate] = useState<string | null>(null);
 
   // Datos de médicos
   const doctors = [
@@ -30,18 +30,18 @@ const SistemaCoordinacionMedica = () => {
   ];
 
   // Generar opciones de tiempo cada 30 minutos
-  const generateTimecupos = () => {
-    const cupos = [];
+  const generateTimeSlots = (): string[] => {
+    const slots: string[] = [];
     for (let hour = 6; hour <= 22; hour++) {
-      cupos.push(`${hour.toString().padStart(2, '0')}:00`);
-      cupos.push(`${hour.toString().padStart(2, '0')}:30`);
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+      slots.push(`${hour.toString().padStart(2, '0')}:30`);
     }
-    return cupos;
+    return slots;
   };
 
   // Generar cupos de citas basado en el rango de tiempo
-  const generateAppointmentcupos = (startTime, endTime, duration) => {
-    const cupos = [];
+  const generateAppointmentSlots = (startTime: string, endTime: string, duration: number): string[] => {
+    const slots: string[] = [];
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
     
@@ -51,20 +51,20 @@ const SistemaCoordinacionMedica = () => {
     for (let minutes = startTotalMinutes; minutes < endTotalMinutes; minutes += duration) {
       const hour = Math.floor(minutes / 60);
       const minute = minutes % 60;
-      cupos.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+      slots.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
     }
     
-    return cupos;
+    return slots;
   };
 
   // Obtener turnos para un médico y fecha específica
-  const getShiftsForDate = (doctorId, date) => {
+  const getShiftsForDate = (doctorId: number, date: string) => {
     const key = `${doctorId}_${date}`;
     return scheduledShifts[key] || [];
   };
 
   // Verificar si un día tiene turnos programados
-  const hasScheduledShifts = (doctorId, day) => {
+  const hasScheduledShifts = (doctorId: number, day: number) => {
     const date = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     return getShiftsForDate(doctorId, date).length > 0;
   };
@@ -81,7 +81,7 @@ const SistemaCoordinacionMedica = () => {
       return;
     }
 
-    const appointmentcupos = generateAppointmentcupos(selectedStartTime, selectedEndTime, appointmentDuration);
+    const appointmentSlots = generateAppointmentSlots(selectedStartTime, selectedEndTime, appointmentDuration);
     
     const key = `${selectedDoctor}_${selectedDate}`;
     setScheduledShifts(prev => ({
@@ -91,7 +91,7 @@ const SistemaCoordinacionMedica = () => {
         startTime: selectedStartTime,
         endTime: selectedEndTime,
         duration: appointmentDuration,
-        cupos: appointmentcupos,
+        slots: appointmentSlots,
         createdAt: new Date().toISOString()
       }]
     }));
@@ -102,11 +102,11 @@ const SistemaCoordinacionMedica = () => {
     setSelectedStartTime('');
     setSelectedEndTime('');
     
-    alert(`Turno programado exitosamente con ${appointmentcupos.length} cupos de ${appointmentDuration} minutos`);
+    alert(`Turno programado exitosamente con ${appointmentSlots.length} cupos de ${appointmentDuration} minutos`);
   };
 
   // Eliminar un turno específico
-  const removeShift = (doctorId, date, shiftId) => {
+  const removeShift = (doctorId: number, date: string, shiftId: number) => {
     const key = `${doctorId}_${date}`;
     setScheduledShifts(prev => ({
       ...prev,
@@ -117,36 +117,50 @@ const SistemaCoordinacionMedica = () => {
   // Renderizar calendario del mes
   const renderCalendar = () => {
     const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
-    const firstDay = new Date(selectedYear, selectedMonth - 1, 1).getDay();
+    const firstDayOfWeek = new Date(selectedYear, selectedMonth - 1, 1).getDay();
     
-    const calendar = [];
+    // Ajustamos para que la semana comience con Lunes (1) en lugar de Domingo (0)
+    const adjustedFirstDay = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+    
+    const calendar: React.ReactNode[] = [];
     const monthNames = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     
     // Espacios vacíos para el primer día del mes
-    for (let i = 0; i < firstDay; i++) {
+    for (let i = 0; i < adjustedFirstDay; i++) {
       calendar.push(<div key={`empty-${i}`} className="p-2"></div>);
     }
     
     // Días del mes
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      const dateObj = new Date(selectedYear, selectedMonth - 1, day);
+      const isSunday = dateObj.getDay() === 0;
+      const dateStr = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       const hasShifts = selectedDoctor && hasScheduledShifts(parseInt(selectedDoctor), day);
-      const shifts = selectedDoctor ? getShiftsForDate(parseInt(selectedDoctor), date) : [];
-      const totalcupos = shifts.reduce((total, shift) => total + shift.cupos.length, 0);
+      const shifts = selectedDoctor ? getShiftsForDate(parseInt(selectedDoctor), dateStr) : [];
+      const totalSlots = shifts.reduce((total, shift) => total + shift.slots.length, 0);
       
       calendar.push(
         <div
           key={day}
           className={`p-2 text-center cursor-pointer border rounded-lg transition-all duration-200 min-h-[80px] flex flex-col justify-between ${
-            hasShifts 
-              ? 'bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-300 shadow-sm' 
-              : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+            isSunday
+              ? 'bg-blue-50 border-blue-200' // Estilo para domingos
+              : hasShifts 
+                ? 'bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-300 shadow-sm' 
+                : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
           }`}
           onClick={() => {
             if (selectedDoctor) {
-              setSelectedDate(date);
-              setShowModal(true);
+              if (isSunday) {
+                if (window.confirm('¿Está seguro que desea programar turnos para un domingo?')) {
+                  setSelectedDate(dateStr);
+                  setShowModal(true);
+                }
+              } else {
+                setSelectedDate(dateStr);
+                setShowModal(true);
+              }
             }
           }}
         >
@@ -157,12 +171,12 @@ const SistemaCoordinacionMedica = () => {
                 {shifts.length} turno{shifts.length > 1 ? 's' : ''}
               </div>
               <div className="text-xs font-medium text-blue-700">
-                {totalcupos} cupos
+                {totalSlots} cupos
               </div>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setViewDate(date);
+                  setViewDate(dateStr);
                   setShowViewModal(true);
                 }}
                 className="flex items-center gap-1 px-2 py-1 mx-auto text-xs text-white transition-colors bg-blue-500 rounded hover:bg-blue-600"
@@ -206,7 +220,7 @@ const SistemaCoordinacionMedica = () => {
         {selectedDoctor && (
           <>
             <div className="grid grid-cols-7 gap-2 mb-4">
-              {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
+              {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
                 <div key={day} className="p-3 text-sm font-semibold text-center text-gray-700 bg-gray-100 rounded-lg">
                   {day}
                 </div>
@@ -224,6 +238,10 @@ const SistemaCoordinacionMedica = () => {
                 <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
                 <span>Con turnos programados</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border border-blue-200 rounded bg-blue-50"></div>
+                <span>Domingos</span>
+              </div>
             </div>
           </>
         )}
@@ -231,7 +249,7 @@ const SistemaCoordinacionMedica = () => {
     );
   };
 
-  const timecupos = generateTimecupos();
+  const timeSlots = generateTimeSlots();
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -303,10 +321,10 @@ const SistemaCoordinacionMedica = () => {
                     .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
                     .reduce((total, [, shifts]) => total + shifts.length, 0);
                   
-                  const totalcupos = Object.entries(scheduledShifts)
+                  const totalSlots = Object.entries(scheduledShifts)
                     .filter(([key]) => key.startsWith(`${selectedDoctor}_${selectedYear}-${selectedMonth.toString().padStart(2, '0')}`))
                     .reduce((total, [, shifts]) => {
-                      return total + shifts.reduce((shiftTotal, shift) => shiftTotal + shift.cupos.length, 0);
+                      return total + shifts.reduce((shiftTotal, shift) => shiftTotal + shift.slots.length, 0);
                     }, 0);
 
                   return (
@@ -317,7 +335,7 @@ const SistemaCoordinacionMedica = () => {
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-blue-50">
                         <span className="text-sm font-medium text-blue-800">Total de cupos:</span>
-                        <span className="text-lg font-bold text-blue-600">{totalcupos}</span>
+                        <span className="text-lg font-bold text-blue-600">{totalSlots}</span>
                       </div>
                     </div>
                   );
@@ -356,7 +374,7 @@ const SistemaCoordinacionMedica = () => {
                   </label>
                   <div className="p-3 rounded-lg bg-blue-50">
                     <p className="text-lg font-semibold text-blue-900">
-                      {selectedDate ? new Date(selectedDate).toLocaleDateString('es-ES', {
+                      {selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('es-ES', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -377,7 +395,7 @@ const SistemaCoordinacionMedica = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleccionar...</option>
-                      {timecupos.map(slot => (
+                      {timeSlots.map(slot => (
                         <option key={`start-${slot}`} value={slot}>{slot}</option>
                       ))}
                     </select>
@@ -393,7 +411,7 @@ const SistemaCoordinacionMedica = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Seleccionar...</option>
-                      {timecupos.map(slot => (
+                      {timeSlots.map(slot => (
                         <option key={`end-${slot}`} value={slot}>{slot}</option>
                       ))}
                     </select>
@@ -422,7 +440,7 @@ const SistemaCoordinacionMedica = () => {
                     <div className="space-y-1 text-sm text-green-700">
                       <p>• Horario: {selectedStartTime} - {selectedEndTime}</p>
                       <p>• Duración por cita: {appointmentDuration} minutos</p>
-                      <p>• Cantidad de cupos: {generateAppointmentcupos(selectedStartTime, selectedEndTime, appointmentDuration).length}</p>
+                      <p>• Cantidad de cupos: {generateAppointmentSlots(selectedStartTime, selectedEndTime, appointmentDuration).length}</p>
                     </div>
                   </div>
                 )}
@@ -467,7 +485,7 @@ const SistemaCoordinacionMedica = () => {
 
               <div className="mb-6">
                 <p className="text-lg font-semibold text-blue-900">
-                  {new Date(viewDate).toLocaleDateString('es-ES', {
+                  {new Date(viewDate + 'T00:00:00').toLocaleDateString('es-ES', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -498,7 +516,7 @@ const SistemaCoordinacionMedica = () => {
                               Turno: {shift.startTime} - {shift.endTime}
                             </h4>
                             <p className="text-sm text-blue-700">
-                              Duración por cita: {shift.duration} minutos | {shift.cupos.length} cupos disponibles
+                              Duración por cita: {shift.duration} minutos | {shift.slots.length} cupos disponibles
                             </p>
                           </div>
                           <button
@@ -510,7 +528,7 @@ const SistemaCoordinacionMedica = () => {
                         </div>
                         
                         <div className="grid grid-cols-4 gap-2">
-                          {shift.cupos.map((slot, index) => (
+                          {shift.slots.map((slot, index) => (
                             <div
                               key={index}
                               className="px-3 py-2 text-sm text-center text-blue-800 bg-white border border-blue-200 rounded"
